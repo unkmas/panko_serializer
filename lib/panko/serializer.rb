@@ -54,8 +54,19 @@ module Panko
 
       attr_accessor :_descriptor
 
+      def attribute_name_transform(transformation)
+        @attribute_name_transform = transformation
+      end
+
+      def association_name_transform(transformation)
+        @association_name_transform = transformation
+      end
+
       def attributes(*attrs)
-        @_descriptor.attributes.push(*attrs.map { |attr| Attribute.create(attr) }).uniq!
+        @_descriptor.attributes.push(*attrs.map do |attr|
+          alias_name = @attribute_name_transform.call(attr) if @attribute_name_transform.present?
+          Attribute.create(attr, alias_name: alias_name)
+        end).uniq!
       end
 
       def aliases(aliases = {})
@@ -82,9 +93,12 @@ module Panko
 
         raise "Can't find serializer for #{self.name}.#{name} has_one relationship." if serializer_const.nil?
 
+        key_name = options.fetch(:name, name).to_s
+        key_name = @association_name_transform.call(key_name) if @association_name_transform.present?
+
         @_descriptor.has_one_associations << Panko::Association.new(
           name,
-          options.fetch(:name, name).to_s,
+          key_name,
           Panko::SerializationDescriptor.build(serializer_const, options)
         )
       end
@@ -98,9 +112,12 @@ module Panko
 
         raise "Can't find serializer for #{self.name}.#{name} has_many relationship." if serializer_const.nil?
 
+        key_name = options.fetch(:name, name).to_s
+        key_name = @association_name_transform.call(key_name) if @association_name_transform.present?
+
         @_descriptor.has_many_associations << Panko::Association.new(
           name,
-          options.fetch(:name, name).to_s,
+          key_name,
           Panko::SerializationDescriptor.build(serializer_const, options)
         )
       end

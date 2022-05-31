@@ -174,6 +174,17 @@ describe Panko::Serializer do
       expect(foo).to serialized_as(FooWithAliasesSerializer, "full_name" => foo.name, "address" => foo.address)
     end
 
+    it "allows to transform attributes keys" do
+      class FooWithAttributesKeyTransfromation < Panko::Serializer
+        attribute_name_transform -> (name) { name.to_s.camelize }
+        attributes :address, :name
+      end
+
+      foo = Foo.create(name: Faker::Lorem.word, address: Faker::Lorem.word).reload
+
+      expect(foo).to serialized_as(FooWithAttributesKeyTransfromation, "Name" => foo.name, "Address" => foo.address)
+    end
+
     it "serializes null values" do
       expect(Foo.create).to serialized_as(FooSerializer, "name" => nil, "address" => nil)
     end
@@ -370,6 +381,26 @@ describe Panko::Serializer do
           "address" => foo.address
         })
     end
+
+    it "allows to transform key" do
+      class FooHolderHasOneWithNameTransfromationSerializer < Panko::Serializer
+        association_name_transform -> (name) { name.to_s.camelize }
+
+        attributes :name
+
+        has_one :foo, serializer: FooSerializer
+      end
+
+      foo = Foo.create(name: Faker::Lorem.word, address: Faker::Lorem.word).reload
+      foo_holder = FooHolder.create(name: Faker::Lorem.word, foo: foo).reload
+
+      expect(foo_holder).to serialized_as(FooHolderHasOneWithNameTransfromationSerializer, "name" => foo_holder.name,
+                                                      "Foo" => {
+                                                        "name" => foo.name,
+                                                        "address" => foo.address
+                                                      })
+    end
+
     it "serializes using the :serializer option" do
       class FooHolderHasOneSerializer < Panko::Serializer
         attributes :name
@@ -551,6 +582,32 @@ describe Panko::Serializer do
           }
         ])
     end
+
+    it "allows to transform key" do
+      class FoosHasManyHolderWithNameTransfromationSerializer < Panko::Serializer
+        association_name_transform -> (name) { name.to_s.camelize }
+        attributes :name
+
+        has_many :foos, serializer: FooSerializer
+      end
+
+      foo1 = Foo.create(name: Faker::Lorem.word, address: Faker::Lorem.word).reload
+      foo2 = Foo.create(name: Faker::Lorem.word, address: Faker::Lorem.word).reload
+      foos_holder = FoosHolder.create(name: Faker::Lorem.word, foos: [foo1, foo2]).reload
+
+      expect(foos_holder).to serialized_as(FoosHasManyHolderWithNameTransfromationSerializer, "name" => foos_holder.name,
+                                                       "Foos" => [
+                                                         {
+                                                           "name" => foo1.name,
+                                                           "address" => foo1.address
+                                                         },
+                                                         {
+                                                           "name" => foo2.name,
+                                                           "address" => foo2.address
+                                                         }
+                                                       ])
+    end
+
     it "infers the serializer name by name of the realtionship" do
       class FoosHasManyHolderSerializer < Panko::Serializer
         attributes :name
