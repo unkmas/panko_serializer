@@ -6,8 +6,10 @@ void hash_attributes_writer(VALUE obj, VALUE attributes,
   for (i = 0; i < RARRAY_LEN(attributes); i++) {
     volatile VALUE raw_attribute = RARRAY_AREF(attributes, i);
     Attribute attribute = attribute_read(raw_attribute);
+    volatile VALUE value = rb_hash_aref(obj, attribute->name_str);
 
-    write_value(writer, attr_name_for_serialization(attribute),
-                rb_hash_aref(obj, attribute->name_str), Qfalse);
+    if (!NIL_P(value)) {
+      write_value(writer, attr_name_for_serialization(attribute), value, Qfalse);
+    }
   }
 }
