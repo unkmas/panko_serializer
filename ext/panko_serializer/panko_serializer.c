@@ -67,9 +67,7 @@ void serialize_has_one_associations(VALUE object, VALUE str_writer,
 
     volatile VALUE value = rb_funcall(object, association->name_id, 0);
 
-    if (NIL_P(value)) {
-      write_value(str_writer, association->name_str, value, Qfalse);
-    } else {
+    if (!NIL_P(value)) {
       serialize_object(association->name_str, value, str_writer,
                        association->descriptor);
     }
@@ -85,9 +83,7 @@ void serialize_has_many_associations(VALUE object, VALUE str_writer,
 
     volatile VALUE value = rb_funcall(object, association->name_id, 0);
 
-    if (NIL_P(value)) {
-      write_value(str_writer, association->name_str, value, Qfalse);
-    } else {
+    if (!NIL_P(value)) {
       serialize_objects(association->name_str, value, str_writer,
                         association->descriptor);
     }
