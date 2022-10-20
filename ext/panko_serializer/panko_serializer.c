@@ -43,7 +43,7 @@ void serialize_method_fields(VALUE object, VALUE str_writer,
 
     volatile VALUE result = rb_funcall(serializer, attribute->name_id, 0);
     if (result != SKIP) {
-      write_value(str_writer, attribute->name_str, result, Qfalse);
+      write_value(str_writer, attr_name_for_serialization(attribute), result, Qfalse);
     }
   }
 

@@ -81,7 +81,7 @@ module Panko
         return if @_descriptor.nil?
 
         deleted_attr = @_descriptor.attributes.delete(method)
-        @_descriptor.method_fields << Attribute.create(method) unless deleted_attr.nil?
+        @_descriptor.method_fields << Attribute.create(method, alias_name: deleted_attr.alias_name) unless deleted_attr.nil?
       end
 
       def has_one(name, options = {})
