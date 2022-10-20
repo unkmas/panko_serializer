@@ -162,6 +162,12 @@ void active_record_attributes_writer(VALUE obj, VALUE attributes,
     volatile VALUE isJson = Qfalse;
     volatile VALUE value = read_attribute(attributes_ctx, attribute, &isJson);
 
+    if (NIL_P(value)) {
+      if (rb_obj_respond_to(obj, attribute->name_id, FALSE)) {
+        value = rb_funcall(obj, attribute->name_id, 0);
+      }
+    }
+
     if (!NIL_P(value)) {
       write_value(writer, attr_name_for_serialization(attribute), value, isJson);
     }
