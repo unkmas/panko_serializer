@@ -176,7 +176,7 @@ describe Panko::Serializer do
 
     it "allows to transform attributes keys" do
       class FooWithAttributesKeyTransfromation < Panko::Serializer
-        attribute_name_transform -> (name) { name.to_s.camelize }
+        attribute_name_transform ->(name) { name.to_s.camelize }
         attributes :address, :name
       end
 
@@ -384,7 +384,7 @@ describe Panko::Serializer do
 
     it "allows to transform key" do
       class FooHolderHasOneWithNameTransfromationSerializer < Panko::Serializer
-        association_name_transform -> (name) { name.to_s.camelize }
+        association_name_transform ->(name) { name.to_s.camelize }
 
         attributes :name
 
@@ -395,10 +395,10 @@ describe Panko::Serializer do
       foo_holder = FooHolder.create(name: Faker::Lorem.word, foo: foo).reload
 
       expect(foo_holder).to serialized_as(FooHolderHasOneWithNameTransfromationSerializer, "name" => foo_holder.name,
-                                                      "Foo" => {
-                                                        "name" => foo.name,
-                                                        "address" => foo.address
-                                                      })
+        "Foo" => {
+          "name" => foo.name,
+          "address" => foo.address
+        })
     end
 
     it "serializes using the :serializer option" do
@@ -585,7 +585,7 @@ describe Panko::Serializer do
 
     it "allows to transform key" do
       class FoosHasManyHolderWithNameTransfromationSerializer < Panko::Serializer
-        association_name_transform -> (name) { name.to_s.camelize }
+        association_name_transform ->(name) { name.to_s.camelize }
         attributes :name
 
         has_many :foos, serializer: FooSerializer
@@ -596,16 +596,16 @@ describe Panko::Serializer do
       foos_holder = FoosHolder.create(name: Faker::Lorem.word, foos: [foo1, foo2]).reload
 
       expect(foos_holder).to serialized_as(FoosHasManyHolderWithNameTransfromationSerializer, "name" => foos_holder.name,
-                                                       "Foos" => [
-                                                         {
-                                                           "name" => foo1.name,
-                                                           "address" => foo1.address
-                                                         },
-                                                         {
-                                                           "name" => foo2.name,
-                                                           "address" => foo2.address
-                                                         }
-                                                       ])
+        "Foos" => [
+          {
+            "name" => foo1.name,
+            "address" => foo1.address
+          },
+          {
+            "name" => foo2.name,
+            "address" => foo2.address
+          }
+        ])
     end
 
     it "infers the serializer name by name of the realtionship" do
